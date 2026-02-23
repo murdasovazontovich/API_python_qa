@@ -6,12 +6,8 @@ from generators import generate_courier_payload
 
 class TestDeleteCourier:
     @allure.title("Удаление курьера")
-    def test_create_delete_courier(self):
-        courier = generate_courier_payload()
-        RegisterCourier.create_courier(courier)
-        login_response = LoginCourier.login_courier({"login": courier["login"], "password": courier["password"]})
-        courier_id = login_response.json()["id"]
-        delete_response = DeleteCourier.delete_courier(courier_id)
+    def test_create_delete_courier(self, created_courier_and_delete):
+        delete_response = DeleteCourier.delete_courier(created_courier_and_delete)
 
         assert delete_response.status_code == 200
         assert delete_response.json() == {"ok": True}
@@ -24,13 +20,9 @@ class TestDeleteCourier:
         assert delete_response.json() == {"message":  "Недостаточно данных для удаления курьера"}
 
     @allure.title("Удаление курьера которого не существует")
-    def test_delete_non_existing_id(self):
-        courier = generate_courier_payload()
-        RegisterCourier.create_courier(courier)
-        login_r = LoginCourier.login_courier({"login": courier["login"], "password": courier["password"]})
-        courier_id = login_r.json()["id"]
-        DeleteCourier.delete_courier(courier_id)
-        response = DeleteCourier.delete_courier(courier_id)
+    def test_delete_non_existing_id(self, create_courier):
+        DeleteCourier.delete_courier(create_courier)
+        response = DeleteCourier.delete_courier(create_courier)
 
         assert response.status_code == 404
         assert response.json() == {"message": "Курьера с таким id нет"}        
